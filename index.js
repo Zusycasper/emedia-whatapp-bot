@@ -13,6 +13,11 @@ const { SYSTEM_PROMPT } = require('./knowledge');
 const conversations = {};
 
 // ─────────────────────────────────────────────
+// HEALTH CHECK — keeps Render free tier awake
+// ─────────────────────────────────────────────
+app.get('/', (req, res) => res.send('Bot is alive ✅'));
+
+// ─────────────────────────────────────────────
 // WEBHOOK VERIFICATION (Meta — one-time setup)
 // ─────────────────────────────────────────────
 app.get('/webhook', (req, res) => {
@@ -111,7 +116,7 @@ app.post('/webhook', async (req, res) => {
 // ─────────────────────────────────────────────
 async function sendWelcome(to) {
   await sendWhatsAppMessage(to,
-    `👋 Hi! Welcome to *eMedia Digital Agency*.\n\nI'm your AI assistant — here to help you find the right solution for your business! 😊`
+    `👋 Hi! Welcome to *e-Mediabiz Digital Agency*.\n\nI'm your AI assistant — here to help you find the right solution for your business! 😊`
   );
   // Short pause so messages arrive in order
   await new Promise(r => setTimeout(r, 800));
@@ -139,12 +144,12 @@ async function sendServiceMenu(to) {
             {
               title: 'What we do',
               rows: [
-                { id: 'svc_web',    title: '🌐 Web Development',      description: 'Websites, apps & digital solutions' },
-                { id: 'svc_social', title: '📱 Social Media',          description: 'AI-powered management & strategy' },
-                { id: 'svc_cloud',  title: '☁️ Cloud & IT Support',    description: 'Infrastructure, security & migration' },
-                { id: 'svc_design', title: '🎨 Creative Design',       description: 'Branding, UI/UX & visuals' },
-                { id: 'svc_price',  title: '💰 Pricing',               description: 'Our packages & rates' },
-                { id: 'svc_contact','title': '📞 Contact Our Team',    description: 'Speak to a human directly' },
+                { id: 'svc_web',     title: '🌐 Web Development',   description: 'Websites, apps & digital solutions' },
+                { id: 'svc_social',  title: '📱 Social Media',       description: 'AI-powered management & strategy' },
+                { id: 'svc_cloud',   title: '☁️ Cloud & IT Support', description: 'Infrastructure, security & migration' },
+                { id: 'svc_design',  title: '🎨 Creative Design',    description: 'Branding, UI/UX & visuals' },
+                { id: 'svc_price',   title: '💰 Pricing',            description: 'Our packages & rates' },
+                { id: 'svc_contact', title: '📞 Contact Our Team',   description: 'Speak to a human directly' },
               ]
             }
           ]
@@ -298,4 +303,22 @@ async function sendWhatsAppMessage(to, text) {
   );
 }
 
-app.listen(3000, () => console.log('✅ eMedia WhatsApp Bot running on port 3000'));
+// ─────────────────────────────────────────────
+// KEEP-ALIVE PING — prevents Render free tier sleeping
+// ─────────────────────────────────────────────
+const RENDER_URL = process.env.RENDER_URL;
+if (RENDER_URL) {
+  setInterval(async () => {
+    try {
+      await axios.get(RENDER_URL);
+      console.log('✅ Keep-alive ping sent');
+    } catch (e) {
+      console.log('⚠️ Keep-alive ping failed:', e.message);
+    }
+  }, 10 * 60 * 1000); // every 10 minutes
+}
+
+// ─────────────────────────────────────────────
+// START SERVER
+// ─────────────────────────────────────────────
+app.listen(3000, () => console.log('✅ e-Mediabiz WhatsApp Bot running on port 3000'));
